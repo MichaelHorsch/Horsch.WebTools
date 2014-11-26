@@ -1,0 +1,21 @@
+﻿@model Horsch.WebTools.Web.Models.View.JsonToAnon.IndexModel
+@{
+    ViewBag.Title = "Json To Anon";
+}
+
+<h1>Enter your json object.</h1>
+
+<form method="post">
+  <textarea name="json">@Model.Json</textarea>
+  <input type="submit" value="Convert to Anon" />
+</form>
+
+@if (Model.IsInvalid)
+{
+  <span>An error has occurred processing your json.</span> 
+}
+
+@if (!string.IsNullOrEmpty(Model.Anon))
+{
+  <code class="codeblock">@Model.Anon</code>
+}
