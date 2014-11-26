@@ -26,7 +26,7 @@ namespace Horsch.WebTools.Web.Controllers
 
             try
             {
-                var jobject = JObject.Parse(json);
+                var jobject = JToken.Parse(json);
                 anon = builder.Build(jobject);
             }
             catch (Exception ex)
