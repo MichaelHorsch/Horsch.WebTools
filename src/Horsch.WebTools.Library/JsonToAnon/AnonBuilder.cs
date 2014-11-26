@@ -16,30 +16,30 @@ namespace Horsch.WebTools.Library.JsonToAnon
             outsideBuilder = new StringBuilder();
             var builder = new StringBuilder("var modelData = ");
 
-            builder = builder.AppendLine(CompileToken(json).ToString());
+            builder = builder.AppendLine(CompileToken(json, 0).ToString());
 
             builder = builder.AppendLine(";");
             outsideBuilder = outsideBuilder.AppendLine(builder.ToString());
             return outsideBuilder.ToString();
         }
 
-        protected string CompileToken(JToken json, string propertyName = null)
+        protected string CompileToken(JToken json, int indentIndex, string propertyName = null)
         {
             var builder = new StringBuilder();
 
             switch(json.Type)
             {
                 case JTokenType.Array:
-                    builder = builder.AppendLine(AddArray((JArray)json, propertyName));
+                    builder = builder.Append(AddArray((JArray)json, propertyName));
                     break;
                 case JTokenType.Object:
-                    builder = builder.AppendLine(AddObject((JObject)json));
+                    builder = builder.Append(AddObject((JObject)json, indentIndex));
                     break;
                 case JTokenType.Property:
-                    builder = builder.AppendLine(AddProperty((JProperty)json));
+                    builder = builder.Append(AddProperty((JProperty)json, indentIndex));
                     break;
                 default:
-                    builder = builder.AppendLine(AddValue(json));
+                    builder = builder.Append(AddValue(json));
                     break;
             }
 
@@ -68,7 +68,7 @@ namespace Horsch.WebTools.Library.JsonToAnon
 
             foreach (var obj in array)
             {
-                builder = builder.Append(CompileToken(obj));
+                builder = builder.Append(CompileToken(obj, 0));
                 builder = builder.AppendLine(",");
             }
 
@@ -80,16 +80,16 @@ namespace Horsch.WebTools.Library.JsonToAnon
         {
             var builder = new StringBuilder();
             var variableName = string.Format("{0}List", propertyName);
+            var indentIndex = 0;
             builder = builder.AppendLine(string.Format("var {0} = new List<object>();", variableName));
 
             builder = builder.AppendLine(string.Format("foreach(var item in {0}) {{", propertyName));
 
-            builder = builder.AppendLine("// dear reader: we are only accounting for the first object type found in the json.  If this is a multitype array, you need to handle that manually.");
-
             var first = array.FirstOrDefault();
             if (first != null)
             {
-                builder = builder.AppendLine(string.Format("{0}.Add({1});", variableName, CompileToken(first)));
+                builder = builder.AppendLine(string.Format("{0}// dear reader: we are only accounting for the first object type found in the json.  If this is a multitype array, you need to handle that manually.", Indents(indentIndex + 1)));
+                builder = builder.AppendLine(string.Format("{0}{1}.Add({2});", Indents(indentIndex + 1), variableName, CompileToken(first, indentIndex + 1)));
             }
 
             builder = builder.AppendLine("}");
@@ -99,25 +99,25 @@ namespace Horsch.WebTools.Library.JsonToAnon
             return variableName;
         }
 
-        protected string AddObject(JObject obj)
+        protected string AddObject(JObject obj, int indentIndex)
         {
             var builder = new StringBuilder();
-            builder = builder.AppendLine("new {");
+            builder = builder.AppendLine(string.Format("new {{"));
 
             foreach (var child in obj.Children())
             {
-                builder = builder.Append(CompileToken(child));
+                builder = builder.Append(CompileToken(child, indentIndex + 1));
             }
 
-            builder = builder.AppendLine("}");
+            builder = builder.AppendLine(string.Format("{0}}}", Indents(indentIndex)));
             return builder.ToString();
         }
 
-        protected string AddProperty(JProperty property)
+        protected string AddProperty(JProperty property, int indentIndex)
         {
             var builder = new StringBuilder();
 
-            builder = builder.AppendLine(string.Format("{0} = {1},", property.Name, CompileToken(property.Value, property.Name)));
+            builder = builder.AppendLine(string.Format("{0}{1} = {2},", Indents(indentIndex), property.Name, CompileToken(property.Value, indentIndex + 1, property.Name)));
 
             return builder.ToString();
         }
@@ -137,6 +137,17 @@ namespace Horsch.WebTools.Library.JsonToAnon
                 default:
                     builder = builder.Append(value.ToString());
                     break;
+            }
+
+            return builder.ToString();
+        }
+
+        protected string Indents(int index)
+        {
+            var builder = new StringBuilder();
+            for (int i = 0; i < index; i++)
+            {
+                builder.Append("\t");
             }
 
             return builder.ToString();
