@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Horsch.WebTools.Library.Extensions;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,18 +10,18 @@ namespace Horsch.WebTools.Library.JsonToAnon
 {
     public class AnonBuilder
     {
-        StringBuilder outsideBuilder = null;
+        StringBuilder MethodBuilder = null;
 
         public string Build(JToken json)
         {
-            outsideBuilder = new StringBuilder();
+            MethodBuilder = new StringBuilder();
             var builder = new StringBuilder("var modelData = ");
 
             builder = builder.Append(CompileToken(json, 0).ToString());
 
             builder = builder.AppendLine(";");
-            outsideBuilder = outsideBuilder.AppendLine(builder.ToString());
-            return outsideBuilder.ToString();
+            MethodBuilder = MethodBuilder.AppendLine(builder.ToString());
+            return MethodBuilder.ToString();
         }
 
         protected string CompileToken(JToken json, int indentIndex, string propertyName = null)
@@ -79,11 +80,15 @@ namespace Horsch.WebTools.Library.JsonToAnon
         protected string AddArrayExternal(JArray array, string propertyName)
         {
             var builder = new StringBuilder();
+            var methodName = string.Format("Get{0}List", propertyName.ToUpperFirstLetter());
             var variableName = string.Format("{0}List", propertyName);
             var indentIndex = 0;
-            builder = builder.AppendLine(string.Format("var {0} = new List<object>();", variableName));
 
-            builder = builder.AppendLine(string.Format("foreach(var item in {0}) {{", propertyName));
+            builder = builder.AppendLine(string.Format("protected IEnumerable<object> {0}(IEnumerable<{1}> dataSourceList) {{", methodName, propertyName));
+            indentIndex++;
+
+            builder = builder.AppendLine(string.Format("{0}var {1} = new List<object>();", Indents(indentIndex), variableName));
+            builder = builder.AppendLine(string.Format("{0}foreach(var item in dataSourceList) {{", Indents(indentIndex)));
 
             var first = array.FirstOrDefault();
             if (first != null)
@@ -92,11 +97,14 @@ namespace Horsch.WebTools.Library.JsonToAnon
                 builder = builder.AppendLine(string.Format("{0}{1}.Add({2});", Indents(indentIndex + 1), variableName, CompileToken(first, indentIndex + 1)));
             }
 
+            builder = builder.AppendLine(string.Format("{0}}}", Indents(indentIndex)));
+            builder = builder.AppendLine(string.Format("{0}return {1};", Indents(indentIndex), variableName));
+            indentIndex--;
             builder = builder.AppendLine("}");
 
-            outsideBuilder = outsideBuilder.AppendLine(builder.ToString());
+            MethodBuilder = MethodBuilder.AppendLine(builder.ToString());
 
-            return variableName;
+            return string.Format("{0}({1})", methodName, variableName);
         }
 
         protected string AddObject(JObject obj, int indentIndex)
@@ -152,20 +160,5 @@ namespace Horsch.WebTools.Library.JsonToAnon
 
             return builder.ToString();
         }
-
-        //protected void blah()
-        //{
-        //    var buttList = new List<object>(); 
-        //    foreach(var item in butt) 
-        //    { // dear reader: we are only accounting for the first object type found in the json. If this is a multitype array, you need to handle that manually. 
-        //        buttList.Add(new { dick = "head" , } ); 
-        //    } 
-        //    var stfuList = new List<object>(); 
-        //    foreach(var item in stfu) 
-        //    { // dear reader: we are only accounting for the first object type found in the json. If this is a multitype array, you need to handle that manually. 
-        //        stfuList.Add(new { geek = "dork" , butt = buttList , } ); 
-        //    } 
-        //    var modelData = new { lol = "rofl" , lmao = new { pizza = true , party = "time!" , } , stfu = stfuList , } ; 
-        //}
     }
 }
