@@ -1,6 +1,5 @@
 ﻿using Horsch.WebTools.Library.JsonToAnon;
 using Horsch.WebTools.Web.Models.View.JsonToAnon;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,8 +25,7 @@ namespace Horsch.WebTools.Web.Controllers
 
             try
             {
-                var jobject = JToken.Parse(json);
-                anon = builder.Build(jobject);
+                anon = builder.Build(json);
             }
             catch (Exception ex)
             {

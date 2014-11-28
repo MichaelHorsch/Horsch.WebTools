@@ -12,12 +12,14 @@ namespace Horsch.WebTools.Library.JsonToAnon
     {
         StringBuilder MethodBuilder = null;
 
-        public string Build(JToken json)
+        public string Build(string json)
         {
             MethodBuilder = new StringBuilder();
             var builder = new StringBuilder("var modelData = ");
 
-            builder = builder.Append(CompileToken(json, 0).ToString());
+            var token = JToken.Parse(json);
+
+            builder = builder.Append(CompileToken(token, 0).ToString());
 
             builder = builder.AppendLine(";");
             MethodBuilder = MethodBuilder.AppendLine(builder.ToString());
