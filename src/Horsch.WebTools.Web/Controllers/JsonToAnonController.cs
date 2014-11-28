@@ -20,7 +20,7 @@ namespace Horsch.WebTools.Web.Controllers
         public ActionResult Index(string json)
         {
             var builder = new AnonBuilder();
-            string anon = string.Empty;
+            AnonBuilderResult anon;
             bool isInvalid = false;
 
             try
@@ -30,6 +30,7 @@ namespace Horsch.WebTools.Web.Controllers
             catch (Exception ex)
             {
                 isInvalid = true;
+                anon = null;
             }
 
             var model = new IndexModel() { Anon = anon, Json = json, IsInvalid = isInvalid };

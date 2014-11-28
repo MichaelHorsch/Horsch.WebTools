@@ -15,7 +15,17 @@
   <span>An error has occurred processing your json.</span> 
 }
 
-@if (!string.IsNullOrEmpty(Model.Anon))
+@if (Model.Anon != null && !string.IsNullOrEmpty(Model.Anon.BuilderString))
 {
-  <pre><code class="codeblock">@Model.Anon</code></pre>
+    <h1>Builder String</h1>
+  <pre><code class="codeblock">@Model.Anon.BuilderString</code></pre>
+}
+
+@if (Model.Anon != null && !string.IsNullOrEmpty(Model.Anon.BuilderString))
+{
+    <h1>Support Methods</h1>
+    foreach (var method in Model.Anon.SupportMethods)
+    {
+        <pre><code class="codeblock">@method</code></pre>
+    }
 }
