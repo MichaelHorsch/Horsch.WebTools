@@ -91,11 +91,13 @@ namespace Horsch.WebTools.Library.JsonToAnon
             var variableName = string.Format("{0}List", propertyName);
             var indentIndex = 0;
 
-            builder = builder.AppendLine(string.Format("protected IEnumerable<object> {0}(IEnumerable<{1}> dataSourceList) {{", methodName, propertyName));
+            builder = builder.AppendLine(string.Format("protected IEnumerable<object> {0}(IEnumerable<{1}> dataSourceList)", methodName, propertyName));
+            builder = builder.AppendLine("{");
             indentIndex++;
 
             builder = builder.AppendLine(string.Format("{0}var {1} = new List<object>();", Indents(indentIndex), variableName));
-            builder = builder.AppendLine(string.Format("{0}foreach(var item in dataSourceList) {{", Indents(indentIndex)));
+            builder = builder.AppendLine(string.Format("{0}foreach(var item in dataSourceList)", Indents(indentIndex)));
+            builder = builder.AppendLine(string.Format("{0}{{", Indents(indentIndex)));
 
             var first = array.FirstOrDefault();
             if (first != null)
@@ -117,7 +119,8 @@ namespace Horsch.WebTools.Library.JsonToAnon
         protected string AddObject(JObject obj, int indentIndex)
         {
             var builder = new StringBuilder();
-            builder = builder.AppendLine("new {");
+            builder = builder.AppendLine("new");
+            builder = builder.AppendLine(string.Format("{0}{{", Indents(indentIndex)));
 
             foreach (var child in obj.Children())
             {
