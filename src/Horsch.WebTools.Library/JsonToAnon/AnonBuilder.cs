@@ -11,19 +11,16 @@ namespace Horsch.WebTools.Library.JsonToAnon
     public class AnonBuilder
     {
         List<string> Methods = null;
-        //StringBuilder MethodBuilder = null;
 
         public AnonBuilderResult Build(string json)
         {
             Methods = new List<string>();
-            //MethodBuilder = new StringBuilder();
             var builder = new StringBuilder("var modelData = ");
 
             var token = JToken.Parse(json);
 
             builder = builder.Append(CompileToken(token, 0).ToString());
             builder = builder.AppendLine(";");
-            //MethodBuilder = MethodBuilder.AppendLine(builder.ToString());
 
             AnonBuilderResult result = new AnonBuilderResult()
             {
@@ -113,7 +110,6 @@ namespace Horsch.WebTools.Library.JsonToAnon
             builder = builder.AppendLine("}");
 
             Methods.Add(builder.ToString());
-            //MethodBuilder = MethodBuilder.AppendLine(builder.ToString());
 
             return string.Format("{0}({1})", methodName, variableName);
         }
